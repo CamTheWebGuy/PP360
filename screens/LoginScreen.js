@@ -12,20 +12,21 @@ import { Input } from '@ui-kitten/components';
 
 import { Button, Text } from '@ui-kitten/components';
 
-import { auth } from '../firebase';
+import { auth, db } from '../firebase';
 
 const image = require('../img/BG.jpg');
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
 
   const navigation = useNavigation();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       if (user) {
-        navigation.replace('Home');
+        navigation.navigate('Dashboard');
       }
     });
 
@@ -37,7 +38,10 @@ const LoginScreen = () => {
       .createUserWithEmailAndPassword(email, password)
       .then((userCredentials) => {
         const user = userCredentials.user;
-        console.log(user.email);
+        db.collection('USERS').doc(userCredentials.user.uid).set({
+          email,
+          name,
+        });
       })
       .catch((error) => alert(error.message));
   };
@@ -47,7 +51,6 @@ const LoginScreen = () => {
       .signInWithEmailAndPassword(email, password)
       .then((userCredentials) => {
         const user = userCredentials.user;
-        console.log('Logged in with: ' + user.email);
       })
       .catch((error) => alert(error.message));
   };
@@ -59,6 +62,13 @@ const LoginScreen = () => {
             <Image style={styles.logo} source={require('../img/g51.png')} />
             <Text style={styles.text}>Sign in to your account</Text>
           </View>
+          <Input
+            placeholder='Name'
+            value={name}
+            onChangeText={(text) => setName(text)}
+            style={styles.input}
+          />
+
           <Input
             placeholder='Email'
             value={email}

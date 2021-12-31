@@ -3,6 +3,8 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { TouchableOpacity } from 'react-native-web';
 
+import { Drawer, DrawerItem, IndexPath } from '@ui-kitten/components';
+
 import { auth } from '../firebase';
 
 const HomeScreen = () => {
@@ -11,7 +13,7 @@ const HomeScreen = () => {
   const handleSignOut = () => {
     auth
       .signOut()
-      .then(navigation.replace('Login'))
+      .then(navigation.navigate('Login'))
       .catch((err) => {
         alert(err.message);
       });
