@@ -1,12 +1,19 @@
 import { StatusBar } from 'expo-status-bar';
-import { AppRegistry, StyleSheet, View } from 'react-native';
+import { AppRegistry, StyleSheet, View, Image } from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useEffect, useState } from 'react';
+
+import { Provider } from 'react-redux';
+import { PersistGate } from 'redux-persist/integration/react';
+
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
+import CustomersScreen from './screens/CustomersScreen';
+
 import 'react-native-gesture-handler';
 
-import { auth } from './firebase';
+import { auth, db } from './firebase';
 
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import {
@@ -25,10 +32,24 @@ import { ApplicationProvider, Layout } from '@ui-kitten/components';
 const Stack = createNativeStackNavigator();
 
 const header = () => {
+  let [result, setResult] = useState({});
+  useEffect(async () => {
+    if (auth.currentUser) {
+      let document = db.collection('USERS').doc(auth.currentUser.uid);
+      let res = await document.get();
+
+      setResult(res.data());
+    }
+  }, [auth.currentUser]);
   return (
     <View style={{ paddingLeft: 20 }}>
-      <Text style={{ fontWeight: 'bold', marginBottom: 5, marginTop: 30 }}>
-        {auth.currentUser?.name}
+      <Image
+        source={{ uri: 'https://randomuser.me/api/portraits/men/74.jpg' }}
+        style={{ width: 80, height: 80, marginTop: 30, borderRadius: 100 }}
+      />
+
+      <Text style={{ fontWeight: 'bold', marginBottom: 5, marginTop: 10 }}>
+        {result?.name}
       </Text>
       <Text style={{ marginBottom: 30 }}>{auth.currentUser?.email}</Text>
       <Divider />
@@ -39,10 +60,14 @@ const header = () => {
 const DrawerContent = ({ navigation, state }) => (
   <Drawer
     header={header}
-    selectedIndex={new IndexPath(state.index)}
-    onSelect={(index) => navigation.navigate(state.routeNames[index.row])}>
-    <DrawerItem title='Users' />
-    <DrawerItem title='Orders' />
+    selectedIndex={new IndexPath(state.index - 1)}
+    onSelect={(index) => navigation.navigate(state.routeNames[index.row + 1])}>
+    <DrawerItem title='Dashboard' />
+    <DrawerItem title='Customers' />
+    <DrawerItem title='Work Orders' />
+    <DrawerItem title='Route Manager' />
+    <DrawerItem title='View My Route' />
+    <DrawerItem title='Settings' />
   </Drawer>
 );
 
@@ -58,6 +83,7 @@ export const DrawerNavigator = () => (
       component={LoginScreen}
     />
     <Screen name='Dashboard' component={HomeScreen} />
+    <Screen name='Customers' component={CustomersScreen} />
   </Navigator>
 );
 

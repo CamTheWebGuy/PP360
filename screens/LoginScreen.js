@@ -24,8 +24,17 @@ const LoginScreen = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged((user) => {
+    const unsubscribe = auth.onAuthStateChanged(async (user) => {
       if (user) {
+        let document = db.collection('USERS').doc(user.uid);
+
+        let result = await document.get();
+
+        if (result.exists) {
+          console.log('got it');
+        } else {
+          console.log('not found');
+        }
         navigation.navigate('Dashboard');
       }
     });

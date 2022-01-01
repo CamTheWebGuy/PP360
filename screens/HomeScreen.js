@@ -1,14 +1,13 @@
 import { useNavigation } from '@react-navigation/core';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { TouchableOpacity } from 'react-native-web';
-
-import { Drawer, DrawerItem, IndexPath } from '@ui-kitten/components';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 
 import { auth } from '../firebase';
 
-const HomeScreen = () => {
+const HomeScreen = ({ route }) => {
   const navigation = useNavigation();
+
+  // const { result } = route.params;
 
   const handleSignOut = () => {
     auth
