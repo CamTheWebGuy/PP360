@@ -10,6 +10,7 @@ const HomeScreen = ({ route }) => {
   // const { result } = route.params;
 
   const handleSignOut = () => {
+    console.log('clicked');
     auth
       .signOut()
       .then(navigation.navigate('Login'))
@@ -21,10 +22,8 @@ const HomeScreen = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text>Email: {auth.currentUser?.email}</Text>
-      <TouchableOpacity style={styles.btn}>
-        <Text style={styles.btnText} onPress={handleSignOut}>
-          Sign Out
-        </Text>
+      <TouchableOpacity style={styles.btn} onPress={handleSignOut}>
+        <Text style={styles.btnText}>Sign Out</Text>
       </TouchableOpacity>
     </View>
   );
