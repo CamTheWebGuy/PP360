@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigation } from '@react-navigation/core';
 import {
   StyleSheet,
   Text,
@@ -6,6 +7,7 @@ import {
   KeyboardAvoidingView,
   ScrollView,
 } from 'react-native';
+
 import {
   Divider,
   List,
@@ -14,13 +16,21 @@ import {
   BottomNavigationTab,
   Input,
   Button,
+  Spinner,
+  Select,
+  SelectItem,
+  IndexPath,
 } from '@ui-kitten/components';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { db, auth } from '../firebase';
 
+import PoolPump from '../components/PoolPump';
+
 const CustomersScreen = () => {
+  const navigation = useNavigation();
+  const [equipmentEditor, setEquipmentEditor] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [customerName, setCustomerName] = useState('');
   const [customerEmail, setCustomerEmail] = useState('');
@@ -30,6 +40,11 @@ const CustomersScreen = () => {
   const [customerState, setCustomerState] = useState('');
   const [customerZip, setCustomerZip] = useState('');
   const [customerGate, setCustomerGate] = useState('');
+
+  const [poolPump, setPoolPump] = useState(new IndexPath(0));
+  const [poolCleaner, setPoolCleaner] = useState('');
+  const [poolHeater, setPoolHeater] = useState('');
+  const [poolFilter, setPoolFilter] = useState('');
 
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,6 +59,8 @@ const CustomersScreen = () => {
         querySnapshot.forEach((doc) => {
           const result = doc.data();
           const customer = {
+            owner: result.owner,
+            id: doc.id,
             name: result.name,
             email: result.email,
             phone: result.phone,
@@ -52,6 +69,11 @@ const CustomersScreen = () => {
             state: result.state,
             zip: result.zip,
             gateCode: result.gate,
+            poolType: result.poolType,
+            poolPump: result.poolPump,
+            poolCleaner: result.poolCleaner,
+            poolHeater: result.poolHeater,
+            poolFilter: result.poolFilter,
           };
           setCustomersList((oldArray) => [...oldArray, customer]);
         });
@@ -73,6 +95,10 @@ const CustomersScreen = () => {
       state: customerState,
       zip: customerZip,
       gateCode: customerGate,
+      poolCleaner,
+      poolPump,
+      poolHeater,
+      poolFilter,
     });
     setIsLoading(false);
     setCustomerName('');
@@ -83,6 +109,10 @@ const CustomersScreen = () => {
     setCustomerState('');
     setCustomerZip('');
     setCustomerGate('');
+    setPoolPump('');
+    setPoolCleaner('');
+    setPoolFilter('');
+    setPoolHeater('');
   };
 
   const data = [
@@ -98,11 +128,16 @@ const CustomersScreen = () => {
     <Ionicons name='chevron-forward-outline' size={22} color='gray' />
   );
 
+  const viewCustomer = (e) => {
+    navigation.navigate('ViewCustomer', { customer: e });
+  };
+
   const renderItem = ({ item, index }) => (
     <ListItem
       title={`${item.name}`}
       description={`${item.address}`}
       accessoryRight={renderArrow}
+      onPress={() => viewCustomer(item)}
     />
   );
 
@@ -184,7 +219,44 @@ const CustomersScreen = () => {
               label='Gate/Lock Code'
               onChange={(e) => setCustomerGate(e.target.value)}
             />
-            <Button style={{ marginTop: 30 }} onPress={() => addCustomer()}>
+            <Button
+              onPress={() => setEquipmentEditor(!equipmentEditor)}
+              accessoryLeft={() => (
+                <Ionicons
+                  name={!equipmentEditor ? 'create' : 'close'}
+                  size={15}
+                  color='white'
+                />
+              )}
+              style={{ marginTop: 30 }}>
+              {!equipmentEditor ? 'Add Equipment' : 'Add Equipment Later'}
+            </Button>
+
+            {equipmentEditor ? (
+              <View style={{ marginTop: 20 }}>
+                <Select label='Pool Type:'>
+                  <SelectItem title='Inground Pool' />
+                  <SelectItem title='Above Ground Pool' />
+                  <SelectItem title='Commercial' />
+                </Select>
+                <PoolPump state={poolPump} updateState={setPoolPump} />
+              </View>
+            ) : (
+              <View></View>
+            )}
+
+            <Button
+              status='success'
+              style={{ marginTop: 30 }}
+              onPress={() => addCustomer()}
+              accessoryLeft={() =>
+                !isLoading ? (
+                  <Ionicons name='save' size={18} color='white' />
+                ) : (
+                  <Spinner size='small' />
+                )
+              }
+              disabled={isLoading}>
               {!isLoading ? (
                 <Text>Save Customer</Text>
               ) : (

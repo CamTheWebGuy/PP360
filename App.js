@@ -10,6 +10,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import LoginScreen from './screens/LoginScreen';
 import HomeScreen from './screens/HomeScreen';
 import CustomersScreen from './screens/CustomersScreen';
+import ViewCustomerScreen from './screens/ViewCustomer';
 
 import 'react-native-gesture-handler';
 
@@ -84,6 +85,7 @@ export const DrawerNavigator = () => (
     />
     <Screen name='Dashboard' component={HomeScreen} />
     <Screen name='Customers' component={CustomersScreen} />
+    <Screen name='ViewCustomer' component={ViewCustomerScreen} />
   </Navigator>
 );
 
