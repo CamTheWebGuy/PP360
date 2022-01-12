@@ -27,6 +27,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { db, auth } from '../firebase';
 
 import PoolPump from '../components/PoolPump';
+import PoolFilter from '../components/PoolFilter';
+import PoolHeater from '../components/PoolHeater';
+import PoolCleaner from '../components/PoolCleaner';
 
 const CustomersScreen = () => {
   const navigation = useNavigation();
@@ -41,14 +44,19 @@ const CustomersScreen = () => {
   const [customerZip, setCustomerZip] = useState('');
   const [customerGate, setCustomerGate] = useState('');
 
-  const [poolPump, setPoolPump] = useState(new IndexPath(0));
-  const [poolCleaner, setPoolCleaner] = useState('');
-  const [poolHeater, setPoolHeater] = useState('');
-  const [poolFilter, setPoolFilter] = useState('');
-
   const [isLoading, setIsLoading] = useState(false);
 
   const [customersList, setCustomersList] = useState([]);
+  const [pumpInfo, setPumpInfo] = useState('');
+  const [filterInfo, setFilterInfo] = useState('');
+  const [heaterInfo, setHeaterInfo] = useState('');
+  const [cleanerInfo, setCleanerInfo] = useState('');
+  const [gallons, setGallons] = useState('');
+
+  const [poolType, setPoolType] = useState('Inground Pool');
+  const [typeIndex, setTypeIndex] = useState(new IndexPath(0));
+
+  const types = ['Inground Pool', 'Above Ground Pool', 'Commercial'];
 
   useEffect(async () => {
     await db
@@ -95,10 +103,12 @@ const CustomersScreen = () => {
       state: customerState,
       zip: customerZip,
       gateCode: customerGate,
-      poolCleaner,
-      poolPump,
-      poolHeater,
-      poolFilter,
+      poolGallons: gallons,
+      poolType: poolType,
+      poolCleaner: cleanerInfo,
+      poolPump: pumpInfo,
+      poolHeater: heaterInfo,
+      poolFilter: filterInfo,
     });
     setIsLoading(false);
     setCustomerName('');
@@ -113,7 +123,15 @@ const CustomersScreen = () => {
     setPoolCleaner('');
     setPoolFilter('');
     setPoolHeater('');
+
+    //Get new customers list
+
+    setSelectedIndex(0);
   };
+
+  useEffect(() => {
+    setPoolType(types[typeIndex.row]);
+  }, [typeIndex]);
 
   const data = [
     { title: 'Rachel West', description: '650 Depaul Dr' },
@@ -131,6 +149,10 @@ const CustomersScreen = () => {
   const viewCustomer = (e) => {
     navigation.navigate('ViewCustomer', { customer: e });
   };
+
+  const renderOption = (title) => (
+    <SelectItem key={title.toString()} title={title.toString()} />
+  );
 
   const renderItem = ({ item, index }) => (
     <ListItem
@@ -234,12 +256,24 @@ const CustomersScreen = () => {
 
             {equipmentEditor ? (
               <View style={{ marginTop: 20 }}>
-                <Select label='Pool Type:'>
-                  <SelectItem title='Inground Pool' />
-                  <SelectItem title='Above Ground Pool' />
-                  <SelectItem title='Commercial' />
+                <Input
+                  placeholder='10000'
+                  label='How Many Gallons Is This Pool?'
+                  value={gallons}
+                  onChange={(e) => setGallons(e.target.value)}
+                />
+                <Select
+                  style={{ marginTop: 10 }}
+                  value={poolType}
+                  selectedIndex={typeIndex}
+                  onSelect={(index) => setTypeIndex(index)}
+                  label='Pool Type:'>
+                  {types.map(renderOption)}
                 </Select>
-                <PoolPump state={poolPump} updateState={setPoolPump} />
+                <PoolPump setPumpInfo={setPumpInfo} />
+                <PoolFilter setFilterInfo={setFilterInfo} />
+                <PoolHeater setHeaterInfo={setHeaterInfo} />
+                <PoolCleaner setCleanerInfo={setCleanerInfo} />
               </View>
             ) : (
               <View></View>
