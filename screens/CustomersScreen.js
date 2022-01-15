@@ -123,6 +123,7 @@ const CustomersScreen = () => {
     setCleanerInfo('');
     setFilterInfo('');
     setHeaterInfo('');
+    setCustomersList([]);
 
     await db
       .collection('CUSTOMERS')

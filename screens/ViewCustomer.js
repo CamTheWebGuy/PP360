@@ -95,12 +95,25 @@ const ViewCustomer = ({ route }) => {
               )}>
               Edit Customer
             </Button>
+            <Button
+              style={{ marginTop: 15 }}
+              status='danger'
+              accessoryLeft={() => (
+                <Ionicons name='close' size={15} color='white' />
+              )}>
+              Delete Customer
+            </Button>
           </ScrollView>
         </View>
       ) : selectedIndex === 1 ? (
         <ScrollView>
           {customer.poolType ? (
             <View>
+              <ListItem
+                title='Pool Gallons:'
+                description={customer.poolGallons}
+              />
+              <Divider />
               <ListItem title='Pool Type:' description={customer.poolType} />
               <Divider />
               <ListItem title='Pool Pump:' description={customer.poolPump} />
