@@ -119,12 +119,41 @@ const CustomersScreen = () => {
     setCustomerState('');
     setCustomerZip('');
     setCustomerGate('');
-    setPoolPump('');
-    setPoolCleaner('');
-    setPoolFilter('');
-    setPoolHeater('');
+    setPumpInfo('');
+    setCleanerInfo('');
+    setFilterInfo('');
+    setHeaterInfo('');
 
-    //Get new customers list
+    await db
+      .collection('CUSTOMERS')
+      .where('owner', '==', auth.currentUser.uid)
+      .get()
+      .then((querySnapshot) => {
+        querySnapshot.forEach((doc) => {
+          const result = doc.data();
+          const customer = {
+            owner: result.owner,
+            id: doc.id,
+            name: result.name,
+            email: result.email,
+            phone: result.phone,
+            address: result.address,
+            city: result.city,
+            state: result.state,
+            zip: result.zip,
+            gateCode: result.gate,
+            poolType: result.poolType,
+            poolPump: result.poolPump,
+            poolCleaner: result.poolCleaner,
+            poolHeater: result.poolHeater,
+            poolFilter: result.poolFilter,
+          };
+          setCustomersList((oldArray) => [...oldArray, customer]);
+        });
+      })
+      .catch((error) => {
+        console.log('Error getting documents: ', error);
+      });
 
     setSelectedIndex(0);
   };
