@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/core';
+import { useFocusEffect } from '@react-navigation/native';
 import {
   StyleSheet,
   Text,
@@ -58,38 +59,46 @@ const CustomersScreen = () => {
 
   const types = ['Inground Pool', 'Above Ground Pool', 'Commercial'];
 
-  useEffect(async () => {
-    await db
-      .collection('CUSTOMERS')
-      .where('owner', '==', auth.currentUser.uid)
-      .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const result = doc.data();
-          const customer = {
-            owner: result.owner,
-            id: doc.id,
-            name: result.name,
-            email: result.email,
-            phone: result.phone,
-            address: result.address,
-            city: result.city,
-            state: result.state,
-            zip: result.zip,
-            gateCode: result.gate,
-            poolType: result.poolType,
-            poolPump: result.poolPump,
-            poolCleaner: result.poolCleaner,
-            poolHeater: result.poolHeater,
-            poolFilter: result.poolFilter,
-          };
-          setCustomersList((oldArray) => [...oldArray, customer]);
-        });
-      })
-      .catch((error) => {
-        console.log('Error getting documents: ', error);
-      });
-  }, []);
+  const fetchCustomers = (querySnapshot) => {
+    setCustomersList([]);
+    querySnapshot.forEach((doc) => {
+      const result = doc.data();
+      const customer = {
+        owner: result.owner,
+        id: doc.id,
+        name: result.name,
+        email: result.email,
+        phone: result.phone,
+        address: result.address,
+        city: result.city,
+        state: result.state,
+        zip: result.zip,
+        gateCode: result.gate,
+        poolType: result.poolType,
+        poolPump: result.poolPump,
+        poolCleaner: result.poolCleaner,
+        poolHeater: result.poolHeater,
+        poolFilter: result.poolFilter,
+      };
+      setCustomersList((oldArray) => [...oldArray, customer]);
+    });
+  };
+
+  useFocusEffect(
+    React.useCallback(() => {
+      const fetch = async () => {
+        await db
+          .collection('CUSTOMERS')
+          .where('owner', '==', auth.currentUser.uid)
+          .get()
+          .then((querySnapshot) => fetchCustomers(querySnapshot))
+          .catch((error) => {
+            console.log('Error getting documents: ', error);
+          });
+      };
+      fetch();
+    }, [])
+  );
 
   const addCustomer = async () => {
     setIsLoading(true);
@@ -129,29 +138,7 @@ const CustomersScreen = () => {
       .collection('CUSTOMERS')
       .where('owner', '==', auth.currentUser.uid)
       .get()
-      .then((querySnapshot) => {
-        querySnapshot.forEach((doc) => {
-          const result = doc.data();
-          const customer = {
-            owner: result.owner,
-            id: doc.id,
-            name: result.name,
-            email: result.email,
-            phone: result.phone,
-            address: result.address,
-            city: result.city,
-            state: result.state,
-            zip: result.zip,
-            gateCode: result.gate,
-            poolType: result.poolType,
-            poolPump: result.poolPump,
-            poolCleaner: result.poolCleaner,
-            poolHeater: result.poolHeater,
-            poolFilter: result.poolFilter,
-          };
-          setCustomersList((oldArray) => [...oldArray, customer]);
-        });
-      })
+      .then((querySnapshot) => fetchCustomers(querySnapshot))
       .catch((error) => {
         console.log('Error getting documents: ', error);
       });
