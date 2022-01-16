@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigation } from '@react-navigation/core';
 import { useFocusEffect } from '@react-navigation/native';
+import validator from 'validator';
 import {
   StyleSheet,
   Text,
@@ -102,48 +103,67 @@ const CustomersScreen = () => {
 
   const addCustomer = async () => {
     setIsLoading(true);
-    await db.collection('CUSTOMERS').doc().set({
-      owner: auth.currentUser?.uid,
-      email: customerEmail,
-      name: customerName,
-      phone: customerPhone,
-      address: customerAddress,
-      city: customerCity,
-      state: customerState,
-      zip: customerZip,
-      gateCode: customerGate,
-      poolGallons: gallons,
-      poolType: poolType,
-      poolCleaner: cleanerInfo,
-      poolPump: pumpInfo,
-      poolHeater: heaterInfo,
-      poolFilter: filterInfo,
-    });
-    setIsLoading(false);
-    setCustomerName('');
-    setCustomerEmail('');
-    setCustomerPhone('');
-    setCustomerAddress('');
-    setCustomerCity('');
-    setCustomerState('');
-    setCustomerZip('');
-    setCustomerGate('');
-    setPumpInfo('');
-    setCleanerInfo('');
-    setFilterInfo('');
-    setHeaterInfo('');
-    setCustomersList([]);
 
-    await db
-      .collection('CUSTOMERS')
-      .where('owner', '==', auth.currentUser.uid)
-      .get()
-      .then((querySnapshot) => fetchCustomers(querySnapshot))
-      .catch((error) => {
-        console.log('Error getting documents: ', error);
+    if (!validator.isEmail(customerEmail)) {
+      setIsLoading(false);
+      return alert('Please provide a valid email');
+    }
+
+    if (
+      !validator.isEmpty(customerEmail) &&
+      !validator.isEmpty(customerName) &&
+      !validator.isEmpty(customerName) &&
+      !validator.isEmpty(customerAddress) &&
+      !validator.isEmpty(customerCity) &&
+      !validator.isEmpty(customerState) &&
+      !validator.isEmpty(customerZip)
+    ) {
+      await db.collection('CUSTOMERS').doc().set({
+        owner: auth.currentUser?.uid,
+        email: customerEmail,
+        name: customerName,
+        phone: customerPhone,
+        address: customerAddress,
+        city: customerCity,
+        state: customerState,
+        zip: customerZip,
+        gateCode: customerGate,
+        poolGallons: gallons,
+        poolType: poolType,
+        poolCleaner: cleanerInfo,
+        poolPump: pumpInfo,
+        poolHeater: heaterInfo,
+        poolFilter: filterInfo,
       });
+      setIsLoading(false);
+      setCustomerName('');
+      setCustomerEmail('');
+      setCustomerPhone('');
+      setCustomerAddress('');
+      setCustomerCity('');
+      setCustomerState('');
+      setCustomerZip('');
+      setCustomerGate('');
+      setPumpInfo('');
+      setCleanerInfo('');
+      setFilterInfo('');
+      setHeaterInfo('');
+      setCustomersList([]);
 
-    setSelectedIndex(0);
+      await db
+        .collection('CUSTOMERS')
+        .where('owner', '==', auth.currentUser.uid)
+        .get()
+        .then((querySnapshot) => fetchCustomers(querySnapshot))
+        .catch((error) => {
+          console.log('Error getting documents: ', error);
+        });
+
+      setSelectedIndex(0);
+    } else {
+      setIsLoading(false);
+      alert('Please Fill Out The Required Fields');
+    }
   };
 
   useEffect(() => {
